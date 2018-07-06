@@ -1,4 +1,4 @@
-'Speed Show 1.0
+'Speed Show 1.1
 
 Dim ItemArray as Array[String]
 
@@ -8,6 +8,8 @@ Dim ItemArrayScaleX as Array[Double]
 Dim ItemArrayScaleY as Array[Double]
 
 Dim PromoArray as Array[Integer]
+
+Dim TextArray as Array[String]
 
 
 Dim Counter as Integer
@@ -22,6 +24,8 @@ Sub ResetArrays()
      ItemArrayScaleY.Clear
 
      PromoArray.Clear
+	 
+	 TextArray.Clear
 End Sub
 
 Sub LoadItems()
@@ -43,18 +47,25 @@ End Sub
 
 
 Sub ArrayLoadLoop()
-     For i = 1 to 60
-           If GetText("Input" & i) <> "" then
-                ItemArray.Push(GetText("Input" & i))
-                
-                ItemArrayPosX.Push(GetPositionX("Input" & i))
-                ItemArrayPosY.Push(GetPositionY("Input" & i))
-                ItemArrayScaleX.Push(GetScaleX("Input" & i))
-                ItemArrayScaleY.Push(GetScaleY("Input" & i))
+     Dim ListContainer as String
+     Dim ListCount as Integer
+     ListContainer = CStr(Scene.FindContainer("Item_Input"))
+     ListCount = CInt(System.SendCommand("0 #" & ListContainer & "*FUNCTION*ControlList*exposed_count GET 0;"))
 
-                PromoArray.Push(CInt(GetText("InputPromo" & i)))
-           End If
+	 
+     For i = 1 to ListCount
+          ItemArray.Push(GetItem(CStr(i)))
+                
+          ItemArrayPosX.Push(GetPositionX(CStr(i)))
+          ItemArrayPosY.Push(GetPositionY(CStr(i)))
+          ItemArrayScaleX.Push(GetScaleX(CStr(i)))
+          ItemArrayScaleY.Push(GetScaleY(CStr(i)))
+
+          PromoArray.Push(CInt(GetPromo(CStr(i))))
+		  
+          TextArray.Push(GetText(CStr(i)))
      Next
+	 
 End Sub
 
 Sub PopulateGraphic(StartLocation as Integer)
@@ -84,6 +95,7 @@ Sub ClearItem(Value as Integer)
      DpSetInt("Item_" & Value & "_Promo", PromoArray[Value - 1])
      SetImage("Item_" & Value & "_Image", "")
      SetText("Label" & Value, "")
+	 SetText("Text" & Value, "")
 End Sub
 
 Sub SetItem(Spot as Integer, Value as Integer)
@@ -97,6 +109,7 @@ Sub SetItem(Spot as Integer, Value as Integer)
      SetScaleY("Item_" & Spot & "_Image", ItemArrayScaleY[Value - 1])
 
      SetText("Label" & Spot, ItemArray[Value - 1])
+	 SetText("Text" & Spot, TextArray[Value - 1])
 End Sub
 
 Sub NextItem()
@@ -125,18 +138,6 @@ Function GetSmm(VarName As String) As String
 	GetSmm = (string)Scene.Map[ VarName ]
 End Function
 
-Function GetText(VarName As String) As String
-     GetText = Scene.FindContainer(VarName).geometry.text
-End Function
-
-Sub SetText(VarName as String,Value as String)
-     Scene.FindContainer(VarName).geometry.text = Value
-End Sub
-
-Sub SetImage(VarName as String,Value as String)
-     Scene.FindContainer(VarName).CreateTexture(Value)
-End Sub
-
 Sub DpSet(Name as String,Value as String)
 	''Sets a DataPool variable AND Scene SMM to given value
 	Scene.GetScenePluginInstance("DataPool").SetParameterString("Data1", Name & "=\"\"" & Value & "\"\";")
@@ -149,20 +150,50 @@ Sub DpSetInt(Name as String,Value as Integer)
 	Scene.Map[ Name ] = Value
 End Sub
 
+
+
+Function GetItem(VarName As String) As String
+     GetItem = Scene.FindContainer("Item_Input").FindSubContainer(VarName).FindSubContainer("Item").geometry.text
+End Function
+
+Function GetText(VarName As String) As String
+     GetText = Scene.FindContainer("Item_Input").FindSubContainer(VarName).FindSubContainer("Text").geometry.text
+End Function
+
+
+
+
+Function GetPromo(VarName As String) As String
+     GetPromo = Scene.FindContainer("Item_Input").FindSubContainer(Name).FindSubContainer("Promo").geometry.text
+End Function
+
+Sub SetText(VarName as String,Value as String)
+     Scene.FindContainer(VarName).geometry.text = Value
+End Sub
+
+
+
+Sub SetImage(VarName as String,Value as String)
+     Scene.FindContainer(VarName).CreateTexture(Value)
+End Sub
+
+
+
+
 Function GetPositionX(Name as String) as Double
-     GetPositionX = Scene.FindContainer(Name).position.x
+     GetPositionX = Scene.FindContainer("Item_Input").FindSubContainer(Name).FindSubContainer("Item").position.x
 End Function
 
 Function GetPositionY(Name as String) as Double
-     GetPositionY = Scene.FindContainer(Name).position.y
+     GetPositionY = Scene.FindContainer("Item_Input").FindSubContainer(Name).FindSubContainer("Item").position.y
 End Function
 
 Function GetScaleX(Name as String) as Double
-     GetScaleX = Scene.FindContainer(Name).scaling.x
+     GetScaleX = Scene.FindContainer("Item_Input").FindSubContainer(Name).FindSubContainer("Item").scaling.x
 End Function
 
 Function GetScaleY(Name as String) as Double
-     GetScaleY = Scene.FindContainer(Name).scaling.y
+     GetScaleY = Scene.FindContainer("Item_Input").FindSubContainer(Name).FindSubContainer("Item").scaling.y
 End Function
 
 Sub SetPositionX(Name as String,Value as Double)
@@ -180,3 +211,23 @@ End Sub
 Sub SetScaleY(Name as String,Value as Double)
      Scene.FindContainer(Name).scaling.y = Value
 End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
